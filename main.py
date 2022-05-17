@@ -107,12 +107,14 @@ class DirectoryMainFuncs:
         import pathlib
 
         with graph.driver.session() as session:
+            # Handle the parent of the directory
             parent_path = os.path.abspath(path_to_add)
             number_of_files_in_dir = self.count_num_of_files(parent_path)
             session.write_transaction(graph.create_directory_item, parent_path, number_of_files_in_dir)
             for root, dirs, files in os.walk(path_to_add):
                 path = root.split(os.sep)
                 print((len(path) - 1) * '---', os.path.basename(root))
+                # Handle the dirs of the directory
                 for dir in dirs:
                     path_of_current_dir = os.path.join(root, dir)
                     number_of_files_in_dir = self.count_num_of_files(path_of_current_dir)
@@ -122,6 +124,7 @@ class DirectoryMainFuncs:
                     session.write_transaction(graph.create_connection_between_folder_to_folder,
                                               os.path.abspath(root),
                                               path_of_current_dir)
+                # Handle the files of the directory
                 for file in files:
                     print(len(path) * '---', file)
                     path_of_current_file = os.path.join(root, file)
@@ -132,7 +135,6 @@ class DirectoryMainFuncs:
                     session.write_transaction(graph.create_connection_between_folder_to_file,
                                               os.path.abspath(root),
                                               path_of_current_file)
-
     def run_queries(graph):
         with graph.driver.session() as session:
             print("")
@@ -146,7 +148,6 @@ class DirectoryMainFuncs:
             print(session.read_transaction(graph.find_exactly_3_empty_subdirectory))
             print("-------------question 5------------")
             print(session.read_transaction(graph.find_equal_files))
-
 
 def get_input():
     print("Please select directory to use: (Caps lock does not matter)")
